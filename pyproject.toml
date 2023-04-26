@@ -13,7 +13,8 @@ typer = "^0.7.0"
 loguru = "^0.7.0"
 rich = "^13.3.4"
 poethepoet = "^0.19.0"
-starlite = "^1.51.10"
+starlite = {extras = ["cli"], version = "^1.51.10"}
+uvicorn = "^0.21.1"
 
 
 [build-system]
