@@ -1,21 +1,24 @@
+import asyncio
 import importlib.util
 import inspect
 from typing import Type
 
-from beanie import Document, Insert, before_event
+import beanie
+from beanie import Document, Insert
 from pydantic import Extra, create_model
 
 
 class BaseRun(Document, extra=Extra.allow):
     proposal: int
     run: int
-    comment: str
+    comment: str | None
 
 
 def load_user_context():
     """Load the context file as a module."""
     spec = importlib.util.spec_from_file_location(
-        "context", "/home/roscar/work/git.xfel.eu/roscar/damnit-knockoff/context.py"
+        "context",
+        "/home/roscar/work/github.com/RobertRosca/damnit-knockoff/context.py",
     )
 
     assert spec is not None
@@ -25,6 +28,20 @@ def load_user_context():
     spec.loader.exec_module(module)
 
     return module
+
+
+def set_self_attribute_decorator(func):
+    async def wrapper(self, *args, **kwargs):
+        name = func.__name__
+        if not asyncio.iscoroutinefunction(func):
+            val = func(self, *args, **kwargs)
+        else:
+            val = await func(self, *args, **kwargs)
+
+        setattr(self, name, val)
+        return val
+
+    return wrapper
 
 
 def parse_methods_as_fields(cls: Type[Document]):
@@ -47,13 +64,12 @@ def parse_methods_as_fields(cls: Type[Document]):
         cls.__name__,
         __base__=cls.__base__,
         __module__=cls.__module__,
-        # __validators__=cls.__validators__,
-        # **cls.__dict__["__annotations__"],
         **fields,
     )
 
     for method in methods:
-        decorated = before_event(Insert)(methods[method])
+        decorated = set_self_attribute_decorator(methods[method])
+        decorated = beanie.before_event(Insert)(decorated)
         setattr(new_cls, method, decorated)
 
     return new_cls
@@ -73,4 +89,4 @@ def get_models():
     return [parse_methods_as_fields(cls) for cls in classes if cls != BaseRun]
 
 
-MODELS = get_models()
+MODELS = get_models()[::-1]
