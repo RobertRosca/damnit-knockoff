@@ -1,10 +1,13 @@
 import asyncio
+from enum import Enum
 import importlib.util
 import inspect
+from functools import wraps
 from types import FunctionType
-from typing import Any, Type
+from typing import Any, Callable, Type
 
-from beanie import Document, Insert, before_event
+from beanie import Document, after_event, before_event
+from beanie.odm.actions import EventTypes
 from pydantic import Extra, create_model
 
 
@@ -14,11 +17,13 @@ class BaseRun(Document, extra=Extra.allow):
     comment: str
 
 
-def load_user_context():
+def load_user_context(
+    file: str = "/home/roscar/work/github.com/RobertRosca/damnit-knockoff/context.py",
+):
     """Load the context file as a module."""
     spec = importlib.util.spec_from_file_location(
         "context",
-        "/home/roscar/work/github.com/RobertRosca/damnit-knockoff/context.py",
+        file,
     )
 
     assert spec is not None
@@ -30,16 +35,34 @@ def load_user_context():
     return module
 
 
-def pseudo_property_decorator(func):
-    async def wrapper(self, *args, **kwargs):
-        if asyncio.iscoroutinefunction(func):
-            val = await func(self, *args, **kwargs)
-        else:
-            val = func(self, *args, **kwargs)
+def field(
+    *args,
+    direction: Callable = before_event,
+    event: EventTypes = EventTypes.INSERT,
+    requires: list | None = None,
+):
+    print(1)
 
-        setattr(self, func.__name__, val)
+    def decorator(func):
+        print(2)
 
-    return wrapper
+        @wraps(func)
+        async def wrapper(self, *args, **kwargs):
+            print(3)
+            if asyncio.iscoroutinefunction(func):
+                val = await func(self, *args, **kwargs)
+            else:
+                val = func(self, *args, **kwargs)
+            setattr(self, func.__name__, val)
+
+        wrapped = direction(event)(wrapper)
+        wrapped.__is_field__ = True
+        return wrapped
+
+    if len(args) == 1 and callable(args[0]):
+        return decorator(args[0])
+    else:
+        return decorator
 
 
 def parse_methods_as_fields(cls: Type[Document]):
@@ -55,8 +78,9 @@ def parse_methods_as_fields(cls: Type[Document]):
             continue
 
         if annotation := method[1].__annotations__.get("return", None):
-            fields[method[0]] = (annotation, None)
-            methods["def_" + method[0]] = method[1]
+            if hasattr(method[1], "__is_field__"):
+                fields[method[0]] = (annotation, None)
+                methods["def_" + method[0]] = method[1]
 
     new_cls = create_model(
         cls.__name__,
@@ -64,11 +88,6 @@ def parse_methods_as_fields(cls: Type[Document]):
         __module__=cls.__module__,
         **fields,
     )
-
-    for name, method in methods.items():
-        decorated = pseudo_property_decorator(method)
-        decorated = before_event(Insert)(decorated)
-        setattr(new_cls, name, decorated)
 
     return new_cls
 
