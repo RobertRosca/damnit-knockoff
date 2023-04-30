@@ -124,6 +124,11 @@ Benefits:
 
 The automatic application of these decorators is kind of weird, I did it to see how it would work since the concept seemed interesting. This version is basically the same as the previous version, but without the automatic decorators.
 
+Benefits:
+
+1. Decorators can have arguments, e.g. `direction` to set if the method gets called before or after events.
+2. Class methods without decorator are not treated as fields automatically, which is a bit more reasonable.
+
 **Note** - I stuck to using class definitions in the context file since that gives an easy way to define multiple collections, but it is of course possible to remove that feature and have a single collection for the context file as is currently done.
 
 ## SQS Call 08:36

@@ -1,12 +1,11 @@
 import asyncio
-from enum import Enum
 import importlib.util
 import inspect
 from functools import wraps
 from types import FunctionType
 from typing import Any, Callable, Type
 
-from beanie import Document, after_event, before_event
+from beanie import Document, before_event
 from beanie.odm.actions import EventTypes
 from pydantic import Extra, create_model
 
@@ -41,14 +40,9 @@ def field(
     event: EventTypes = EventTypes.INSERT,
     requires: list | None = None,
 ):
-    print(1)
-
     def decorator(func):
-        print(2)
-
         @wraps(func)
         async def wrapper(self, *args, **kwargs):
-            print(3)
             if asyncio.iscoroutinefunction(func):
                 val = await func(self, *args, **kwargs)
             else:
@@ -88,6 +82,9 @@ def parse_methods_as_fields(cls: Type[Document]):
         __module__=cls.__module__,
         **fields,
     )
+
+    for method, func in methods.items():
+        setattr(new_cls, method, func)
 
     return new_cls
 
