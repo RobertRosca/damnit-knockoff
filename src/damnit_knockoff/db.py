@@ -5,8 +5,8 @@ from damnit_knockoff.context_reader import MODELS
 
 
 async def db_init():
-    client = AsyncIOMotorClient("mongodb://localhost:27017")
+    client = AsyncIOMotorClient("mongodb://localhost:27017/")
     await init_beanie(
-        database=client.db_name,
+        database=client.damnit,
         document_models=MODELS,  # type: ignore
     )

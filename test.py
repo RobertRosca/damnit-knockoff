@@ -1,5 +1,7 @@
 import asyncio
 
+from pathlib import Path
+
 from damnit_knockoff.db import db_init
 from damnit_knockoff.context_reader import MODELS
 
@@ -8,14 +10,12 @@ async def test():
     await db_init()
 
     for model in MODELS:
-        print(f"Inserting fake data into {model.__name__}")
-        await model(proposal=1, run=1, comment="hi").insert()
-
-    for model in MODELS:
-        res = await model.find_all().to_list()
-        print(f"Found {len(res)} entries in {model.__name__}")
-        for entry in res:
-            print(f"  - {entry}")
+        latest = await model.find().sort(-model.run).limit(1).first_or_none()
+        await model(
+            proposal=4696,
+            run=latest.run + 1 if latest else 1,
+            path=Path("/gpfs/exfel/exp/HED/202321/p004696/"),
+        ).insert()
 
 
 if __name__ == "__main__":

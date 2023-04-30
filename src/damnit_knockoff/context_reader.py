@@ -2,10 +2,11 @@ import asyncio
 import importlib.util
 import inspect
 from functools import wraps
+from pathlib import Path
 from types import FunctionType
 from typing import Any, Callable, Type
 
-from beanie import Document, before_event
+from beanie import Document, after_event, before_event
 from beanie.odm.actions import EventTypes
 from pydantic import Extra, create_model
 
@@ -13,7 +14,8 @@ from pydantic import Extra, create_model
 class BaseRun(Document, extra=Extra.allow):
     proposal: int
     run: int
-    comment: str
+    path: Path
+    comment: str | None = None
 
 
 def load_user_context(
@@ -38,7 +40,6 @@ def field(
     *args,
     direction: Callable = before_event,
     event: EventTypes = EventTypes.INSERT,
-    requires: list | None = None,
 ):
     def decorator(func):
         @wraps(func)
