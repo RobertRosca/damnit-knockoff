@@ -6,26 +6,16 @@ from pathlib import Path
 from types import FunctionType
 from typing import Any, Callable, Type
 
-from beanie import Document, after_event, before_event
+from beanie import Document, before_event
 from beanie.odm.actions import EventTypes
-from pydantic import Extra, create_model
+from pydantic import create_model
+
+from damnit_knockoff.db import Run
 
 
-class BaseRun(Document, extra=Extra.allow):
-    proposal: int
-    run: int
-    path: Path
-    comment: str | None = None
-
-
-def load_user_context(
-    file: str = "/home/roscar/work/github.com/RobertRosca/damnit-knockoff/context.py",
-):
+def load_user_context(file: Path):
     """Load the context file as a module."""
-    spec = importlib.util.spec_from_file_location(
-        "context",
-        file,
-    )
+    spec = importlib.util.spec_from_file_location("context", file)
 
     assert spec is not None
     module = importlib.util.module_from_spec(spec)
@@ -67,8 +57,11 @@ def parse_methods_as_fields(cls: Type[Document]):
     methods: dict[str, FunctionType] = {}
 
     for method in inspect.getmembers(cls, inspect.isfunction):
-        if method[0].startswith("_") or method in inspect.getmembers(
-            BaseRun, inspect.isfunction
+        if any(
+            [
+                method[0].startswith("_"),
+                method in inspect.getmembers(Run, inspect.isfunction),
+            ]
         ):
             continue
 
@@ -90,18 +83,18 @@ def parse_methods_as_fields(cls: Type[Document]):
     return new_cls
 
 
-def get_classes():
-    context = load_user_context()
+def get_classes(file: Path = Path("./context.py")) -> list[Type[Document]]:
+    context = load_user_context(file)
 
     classes = inspect.getmembers(context, inspect.isclass)
 
     return [c[1] for c in classes if issubclass(c[1], Document)]
 
 
-def get_models():
-    classes = get_classes()
+def get_models(file: Path = Path("context.py")) -> list[Type[Document]]:
+    classes = get_classes(file)
 
-    return [parse_methods_as_fields(cls) for cls in classes if cls != BaseRun]
+    return [parse_methods_as_fields(cls) for cls in classes if cls != Run]
 
 
 MODELS = get_models()
