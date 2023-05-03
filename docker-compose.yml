@@ -1,0 +1,34 @@
+version: "3"
+
+services:
+  tooljet:
+    image: tooljet/try:latest
+    container_name: tooljet
+    network_mode: host
+    volumes:
+      - tooljet:/var/lib/postgresql/13/main
+    restart: unless-stopped
+    # ports:
+    #   - "80:80"
+
+  mongo:
+    image: mongo:4.4.6
+    container_name: mongo
+    network_mode: host
+    volumes:
+      - mongo:/data/db
+    restart: unless-stopped
+    # ports:
+    #   - "27017:27017"
+
+  damnit:
+    build: .
+    container_name: damnit
+    network_mode: host
+    volumes:
+      - .:/app
+    restart: unless-stopped
+
+volumes:
+  tooljet:
+  mongo:
