@@ -4,6 +4,8 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 from pprint import pprint
 
+from pydantic import Extra
+
 
 class BaseRun(Document):
     proposal: int
@@ -11,7 +13,7 @@ class BaseRun(Document):
     comment: str = ""
 
 
-class UserClass(BaseRun):
+class UserClass(BaseRun, extra=Extra.allow):
     foo: int | None = None
     bar: list | None = None
     baz: dict[str, int] | None = None
@@ -66,7 +68,7 @@ async def test():
     await uc.insert()  # type: ignore
     print(f"{uc}")
 
-    res = await UserClass.find_all().to_list()
+    res = await UserClass.find_all().to_list()  # type: ignore
     pprint(res)
 
 
