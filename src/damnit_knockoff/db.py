@@ -2,19 +2,23 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from beanie import Document, init_beanie
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel
 
 if TYPE_CHECKING:
     from starlite import State
 
 
 class RunCreate(BaseModel):
+    """Essential information that **must** be provided to trigger a Run event."""
+
     proposal: int
     run: int
     path: Path
 
 
-class Run(RunCreate, Document, extra=Extra.allow):
+class Run(RunCreate, Document):
+    """Optional information that is commonly added."""
+
     comment: str | None = None
 
 
@@ -26,6 +30,7 @@ async def db_init(
 ):
     from damnit_knockoff.context_reader import MODELS
 
+    # From messing with different client types
     match db_type:
         case "motor":
             from motor.motor_asyncio import AsyncIOMotorClient as Client
@@ -36,7 +41,7 @@ async def db_init(
         case _:
             raise Exception()
 
-    client = Client("LOCAL_DIRECTORY")
+    client = Client(url)
 
     await init_beanie(
         database=getattr(client, db_name),

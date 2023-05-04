@@ -34,16 +34,19 @@ def field(
     def decorator(func):
         @wraps(func)
         async def wrapper(self, *args, **kwargs):
+            # Work on both standard and async functions
             if asyncio.iscoroutinefunction(func):
                 val = await func(self, *args, **kwargs)
             else:
                 val = func(self, *args, **kwargs)
             setattr(self, func.__name__, val)
 
+        # Apply the direction and event, e.g. `before_event(Insert)`
         wrapped = direction(event)(wrapper)
         wrapped.__is_field__ = True
         return wrapped
 
+    # Stuff to accept both `@field` and `@field(...)`
     if len(args) == 1 and callable(args[0]):
         return decorator(args[0])
     else:
@@ -57,19 +60,23 @@ def parse_methods_as_fields(cls: Type[Document]):
     methods: dict[str, FunctionType] = {}
 
     for method in inspect.getmembers(cls, inspect.isfunction):
+        # Exclusion criteria
         if any(
             [
                 method[0].startswith("_"),
                 method in inspect.getmembers(Run, inspect.isfunction),
+                not hasattr(method[1], "__is_field__"),  # Added by `field` decorator
             ]
         ):
             continue
 
         if annotation := method[1].__annotations__.get("return", None):
-            if hasattr(method[1], "__is_field__"):
-                fields[method[0]] = (annotation, None)
-                methods["def_" + method[0]] = method[1]
+            fields[method[0]] = (annotation, None)
+            methods["def_" + method[0]] = method[1]
 
+    # Create a new Pydantic model, starts off with the base class (`Run`) and adds any
+    # `@field`-decorated method as a field of the same name, with the method's return
+    # type as its type
     new_cls = create_model(
         cls.__name__,
         __base__=cls.__base__,
@@ -77,6 +84,9 @@ def parse_methods_as_fields(cls: Type[Document]):
         **fields,
     )
 
+    # Carry the `@field`-decorated methods on to the new class, with `def_` prepended
+    # so that they do not clash with the fields and so that they are still present to
+    # define the `before/after_event` actions
     for method, func in methods.items():
         setattr(new_cls, method, func)
 
