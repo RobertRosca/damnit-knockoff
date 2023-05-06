@@ -17,6 +17,7 @@ plotly = "^5.14.1"
 pandas = "^2.0.1"
 starlite = "^1.51.11"
 beanita = "^0.1.0"
+extra-data = "^1.12.0"
 
 
 [build-system]

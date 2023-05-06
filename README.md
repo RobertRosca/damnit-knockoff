@@ -1,5 +1,13 @@
 # DAMNIT Knockoff
 
+## Implementing Suggestions from Workshop
+
+Powered by salt, I have decided to try and implement a few things that came up during the workshop to see if the ideas presented to make development easier.
+
+Current status:
+
+| Feature         | Status | Source       |Comments         | Commit |
+|-----------------|--------|--------------|-----------------|--------|
 ## Summary of Ideas
 
 ### Generic

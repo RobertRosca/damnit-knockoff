@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from beanie import Document, init_beanie
+import extra_data
 
 if TYPE_CHECKING:
     from starlite import State
@@ -10,9 +11,13 @@ if TYPE_CHECKING:
 class RunBase(Document):
     """Essential information that **must** be provided to trigger a Run event."""
 
-    proposal: int
-    run: int
-    path: Path
+    proposal_no: int
+    run_no: int
+    run_path: Path
+
+    # @property
+    # def run(self) -> extra_data.DataCollection:
+    #     return extra_data.RunDirectory(self.run_path)
 
 
 def get_mongo_db():

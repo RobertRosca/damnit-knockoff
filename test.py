@@ -9,15 +9,15 @@ from damnit_knockoff.context_reader import MODELS
 async def test():
     await db_init(
         state=None,  # type: ignore
-        client="mongo",
+        client="beanita",
     )
 
     for model in MODELS:
-        latest = await model.find().sort(-model.run).limit(1).first_or_none()  # type: ignore
+        latest = await model.find().sort(-model.run_no).limit(1).first_or_none()  # type: ignore
         res = await model(
-            proposal=4696,
-            run=latest.run + 1 if latest else 1,
-            path=Path("/gpfs/exfel/exp/HED/202321/p004696/"),
+            proposal_no=4696,
+            run_no=latest.run_no + 1 if latest else 1,
+            run_path=Path("/gpfs/exfel/exp/HED/202321/p004696/"),
         ).insert()  # type: ignore
 
         query_all = await model.find_all().to_list()  # type: ignore
