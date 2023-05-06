@@ -1,0 +1,62 @@
+version: "3"
+
+services:
+  tooljet:
+    tty: true
+    stdin_open: true
+    image: tooljet/tooljet-ce:latest
+    restart: always
+    env_file: .env
+    ports:
+      - 80:80
+    depends_on:
+      - postgres
+    environment:
+      SERVE_CLIENT: "true"
+      PORT: "80"
+    command: npm run start:prod
+
+  postgres:
+    image: postgres:13
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+
+  # appsmith:
+  #   image: index.docker.io/appsmith/appsmith-ce
+  #   container_name: appsmith
+  #   # network_mode: host
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - appsmith:/appsmith-stacks
+  #   restart: unless-stopped
+
+  mongo:
+    image: mongo:4.4.6
+    container_name: mongo
+    # network_mode: host
+    volumes:
+      - mongo:/data/db
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+
+  damnit:
+    build: .
+    container_name: damnit
+    # network_mode: host
+    volumes:
+      - .:/app
+    restart: unless-stopped
+
+volumes:
+  tooljet:
+  mongo:
+  appsmith:
+  postgres:

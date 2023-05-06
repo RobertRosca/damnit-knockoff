@@ -8,6 +8,14 @@ packages = [{include = "damnit_knockoff", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
+beanie = "^1.18.0"
+typer = "^0.7.0"
+loguru = "^0.7.0"
+rich = "^13.3.4"
+uvicorn = "^0.21.1"
+plotly = "^5.14.1"
+pandas = "^2.0.1"
+starlite = "^1.51.11"
 
 
 [build-system]
