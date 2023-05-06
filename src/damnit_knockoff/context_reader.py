@@ -10,7 +10,7 @@ from beanie import Document, before_event
 from beanie.odm.actions import EventTypes
 from pydantic import create_model
 
-from damnit_knockoff.db import Run
+from damnit_knockoff.db import RunBase
 
 
 def load_user_context(file: Path):
@@ -64,7 +64,7 @@ def parse_methods_as_fields(cls: Type[Document]):
         if any(
             [
                 method[0].startswith("_"),
-                method in inspect.getmembers(Run, inspect.isfunction),
+                method in inspect.getmembers(RunBase, inspect.isfunction),
                 not hasattr(method[1], "__is_field__"),  # Added by `field` decorator
             ]
         ):
@@ -104,7 +104,7 @@ def get_classes(file: Path = Path("./context.py")) -> list[Type[Document]]:
 def get_models(file: Path = Path("context.py")) -> list[Type[Document]]:
     classes = get_classes(file)
 
-    return [parse_methods_as_fields(cls) for cls in classes if cls != Run]
+    return [parse_methods_as_fields(cls) for cls in classes if cls != RunBase]
 
 
 MODELS = get_models()

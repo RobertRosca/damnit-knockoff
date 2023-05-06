@@ -16,8 +16,6 @@ uvicorn = "^0.21.1"
 plotly = "^5.14.1"
 pandas = "^2.0.1"
 starlite = "^1.51.11"
-mongita = "^1.2.0"
-beanita = "^0.1.0"
 
 
 [build-system]

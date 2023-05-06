@@ -1,20 +1,13 @@
-import datetime
-import numpy as np
+import random
 from pathlib import Path
+
+import numpy as np
 import plotly.graph_objects as go
 
-from damnit_knockoff.context_reader import Run, field
-import plotly.express as px
+from damnit_knockoff.context_reader import RunBase, field
 
 
-import random
-
-
-class SomeTable(Run):
-    # @field
-    # def files_in_raw(self) -> int:
-    #     return len(list((self.path / "raw" / f"r{self.run:04d}").glob("*")))
-
+class SomeTable(RunBase):
     @field
     def thing(self) -> str:
         return "hi"
