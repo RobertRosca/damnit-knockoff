@@ -8,6 +8,12 @@ from xarray import DataArray, Dataset
 from damnit_knockoff.context_reader import RunBase, field
 
 
+class AnotherTable(RunBase):
+    @field
+    def independence(self):
+        return True
+
+
 class SomeTable(RunBase):
     # @field
     # def extracted_value(self):
