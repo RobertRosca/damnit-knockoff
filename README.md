@@ -6,8 +6,10 @@ Powered by salt, I have decided to try and implement a few things that came up d
 
 Current status:
 
-| Feature         | Status | Source       |Comments         | Commit |
-|-----------------|--------|--------------|-----------------|--------|
+| Feature         | Status | Source       |Comments         | Commit                                   |
+|-----------------|--------|--------------|-----------------|------------------------------------------|
+| Multiple Tables | Yes    | Classes, ORM | Already working | 75822c2097abb828424d6e5fb7eee7c4b06187a0 |
+
 ## Summary of Ideas
 
 ### Generic
