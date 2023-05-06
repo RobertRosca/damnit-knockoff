@@ -9,7 +9,7 @@ from damnit_knockoff.context_reader import MODELS
 async def test():
     await db_init(
         state=None,  # type: ignore
-        url="mongodb://localhost:27017/",
+        client="mongo",
     )
 
     for model in MODELS:
@@ -19,6 +19,9 @@ async def test():
             run=latest.run + 1 if latest else 1,
             path=Path("/gpfs/exfel/exp/HED/202321/p004696/"),
         ).insert()  # type: ignore
+
+        query_all = await model.find_all().to_list()  # type: ignore
+        print(query_all)
 
 
 if __name__ == "__main__":

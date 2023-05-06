@@ -15,17 +15,34 @@ class RunBase(Document):
     path: Path
 
 
-async def db_init(
-    state: "State" = None,  # type: ignore
-    url: str = "mongodb://localhost:27017/",
-    db_name: str = "damnit",
-):
-    from damnit_knockoff.context_reader import MODELS
+def get_mongo_db():
     from motor.motor_asyncio import AsyncIOMotorClient as Client
 
-    client = Client(url)
+    client = Client("mongodb://localhost:27017/")
+
+    return client.damnit
+
+
+def get_beanita_db():
+    from beanita import Client
+
+    client = Client("beanita")
+
+    return client["damnit"]
+
+
+async def db_init(
+    state: "State" = None,  # type: ignore
+    client="beanita",
+):
+    from damnit_knockoff.context_reader import MODELS
+
+    if client == "beanita":
+        db = get_beanita_db()
+    else:
+        db = get_mongo_db()
 
     await init_beanie(
-        database=getattr(client, db_name),
+        database=db,
         document_models=MODELS,  # type: ignore
     )

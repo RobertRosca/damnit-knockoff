@@ -78,7 +78,7 @@ def parse_methods_as_fields(cls: Type[Document]):
     # `@field`-decorated method as a field of the same name, with the method's return
     # type as its type
     new_cls = create_model(
-        cls.__name__,
+        cls.__name__,  # type: ignore
         __base__=cls.__base__,
         __module__=cls.__module__,
         **fields,
