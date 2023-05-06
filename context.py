@@ -21,6 +21,18 @@ class SomeTable(RunBase):
     #     # saves the path within the HDF5 file, which is used later for loading
     #     return self.run["bla"]["position.value"]
 
+    @field
+    async def query_self_table_in_call(self) -> int:
+        # This shows querying the database in a field's call method, pretty messy, can
+        # be tidied up a bit but core functionality is here
+        res = await SomeTable.find().sort(-SomeTable.run_no).limit(1).first_or_none()
+        return res.run_no if res else 0
+
+    @field
+    async def query_other_table_in_call(self) -> bool | None:
+        # Also applies to other tables:
+        res = await AnotherTable.find().sort(-AnotherTable.run_no).limit(1).first_or_none()  # type: ignore
+        return res.independence if res else None
 
     # @field
     # def random_plotly_schema(self) -> str:
