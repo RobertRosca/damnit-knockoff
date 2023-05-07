@@ -10,7 +10,7 @@ from beanie import Document, before_event
 from beanie.odm.actions import EventTypes
 from pydantic import create_model
 
-from damnit_knockoff.db import RunBase
+from damnit_knockoff.db import RunBase, RunInsert
 
 
 def load_user_context(file: Path):
@@ -100,9 +100,13 @@ def get_classes(file: Path = Path("./context.py")) -> list[Type[Document]]:
 
 
 def get_models(file: Path = Path("context.py")) -> list[Type[Document]]:
+    from damnit_knockoff.db import RunRevisions
+
     classes = get_classes(file)
 
-    return [parse_methods_as_fields(cls) for cls in classes if cls != RunBase]
+    user = [parse_methods_as_fields(cls) for cls in classes if cls != RunInsert]
+
+    return [RunRevisions, *user]
 
 
 MODELS = get_models()
