@@ -1,9 +1,8 @@
 import asyncio
-from beanie import Document, Insert, before_event, init_beanie
-from motor.motor_asyncio import AsyncIOMotorClient
-
 from pprint import pprint
 
+from beanie import Document, Insert, before_event, init_beanie
+from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import Extra
 
 

@@ -1,8 +1,9 @@
 from typing import Union, cast
-from starlite import Controller, Starlite, post, get
 
-from damnit_knockoff.db import RunInsert
+from starlite import Controller, Starlite, get, post
+
 from damnit_knockoff.context_reader import MODELS
+from damnit_knockoff.db import RunInsert
 
 
 class Health(Controller):

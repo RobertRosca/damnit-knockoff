@@ -1,5 +1,5 @@
-from typer import Typer
 from rich import print
+from typer import Typer
 
 app = Typer()
 
