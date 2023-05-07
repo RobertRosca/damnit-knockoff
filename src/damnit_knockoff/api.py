@@ -1,7 +1,7 @@
 from typing import Union, cast
 from starlite import Controller, Starlite, post, get
 
-from damnit_knockoff.db import RunBase, RunBase, db_init
+from damnit_knockoff.db import RunInsert
 from damnit_knockoff.context_reader import MODELS
 
 
@@ -19,14 +19,14 @@ class Backend(Controller):
     path = "/trigger"
 
     @post()
-    async def trigger(self, data: RunBase) -> dict[str, Union[*MODELS]]:
+    async def trigger(self, data: RunInsert) -> dict[str, Union[*MODELS]]:
         res = []
         for model in MODELS:
-            model = cast(RunBase, model)
-            instance = model(**data.dict())
+            model = cast(RunInsert, model)
+            instance = model(**data.dict())  # type: ignore
             await instance.insert()  # type: ignore
             res.append(instance)
-        return [r.json() for r in res]
+        return {"data": res}
 
 
 app = Starlite(

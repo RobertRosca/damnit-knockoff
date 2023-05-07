@@ -59,20 +59,18 @@ def parse_methods_as_fields(cls: Type[Document]):
     fields: dict[str, tuple[Type, Any]] = {}
     methods: dict[str, FunctionType] = {}
 
+    base_methods = inspect.getmembers(RunBase, inspect.isfunction)
+
     for method in inspect.getmembers(cls, inspect.isfunction):
-        # Exclusion criteria
-        if any(
-            [
-                method[0].startswith("_"),
-                method in inspect.getmembers(RunBase, inspect.isfunction),
-                not hasattr(method[1], "__is_field__"),  # Added by `field` decorator
-            ]
-        ):
+        if method in base_methods:
             continue
 
-        if annotation := method[1].__annotations__.get("return", None):
-            fields[method[0]] = (annotation, None)
-            methods["def_" + method[0]] = method[1]
+        if hasattr(method[1], "__is_field__"):  # Added by `field` decorator
+            if annotation := method[1].__annotations__.get("return", None):
+                fields[method[0]] = (annotation, None)
+                methods["def_" + method[0]] = method[1]
+        else:
+            methods[method[0]] = method[1]
 
     # Create a new Pydantic model, starts off with the base class (`Run`) and adds any
     # `@field`-decorated method as a field of the same name, with the method's return
