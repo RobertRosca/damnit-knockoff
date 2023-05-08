@@ -3,23 +3,30 @@ from pathlib import Path
 
 import numpy as np
 import plotly.graph_objects as go
-from xarray import DataArray, Dataset
 
-from damnit_knockoff.context_reader import RunBase, field
+from damnit_knockoff.context_reader import RunInsert, field
 
 
-class AnotherTable(RunBase):
+class AnotherTable(RunInsert):
     @field
     def independence(self):
         return True
 
 
-class SomeTable(RunBase):
+class SomeTable(RunInsert):
     # @field
     # def extracted_value(self):
     #     # TODO: looks like it returns the data for a run's source, but actually
     #     # saves the path within the HDF5 file, which is used later for loading
     #     return self.run["bla"]["position.value"]
+
+    @field
+    def raw(self) -> bool:
+        return False
+
+    @field
+    def proc(self) -> bool:
+        return False
 
     @field
     async def query_self_table_in_call(self) -> int:

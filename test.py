@@ -1,27 +1,49 @@
 import asyncio
-
+import random
 from pathlib import Path
 
-from damnit_knockoff.db import db_init
 from damnit_knockoff.context_reader import MODELS
+from damnit_knockoff.db import db_init
+
+
+async def add_or_update(
+    model, proposal_no: int, run_no: int, run_path: Path, change=False
+):
+    m = model.find(model.proposal_no == proposal_no, model.run_no == run_no)
+    m = await m.first_or_none()
+    changed = m is not None
+    if not m:
+        m = model(
+            proposal_no=proposal_no,
+            run_no=run_no,
+            run_path=run_path,
+        )
+
+    if change:
+        m.random = random.randint(0, 100)
+        if not m.raw:
+            m.raw = True
+        else:
+            if not m.proc:
+                m.proc = True
+
+    if changed:
+        await m.save_changes()
+    else:
+        await m.insert()
 
 
 async def test():
     await db_init(
         state=None,  # type: ignore
-        client="beanita",
+        client="mongo",
     )
 
-    for model in MODELS:
-        latest = await model.find().sort(-model.run_no).limit(1).first_or_none()  # type: ignore
-        res = await model(
-            proposal_no=4696,
-            run_no=latest.run_no + 1 if latest else 1,
-            run_path=Path("/gpfs/exfel/exp/HED/202321/p004696/"),
-        ).insert()  # type: ignore
+    proposal_no = 3360
+    run_no = 132
+    run_path = Path("/gpfs/exfel/exp/SCS/202301/p003360/raw/r0131")
 
-        query_all = await model.find_all().to_list()  # type: ignore
-        print(query_all)
+    await add_or_update(MODELS[2], proposal_no, run_no, run_path, change=True)
 
 
 if __name__ == "__main__":

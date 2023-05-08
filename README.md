@@ -2,15 +2,51 @@
 
 ## Implementing Suggestions from Workshop
 
-Powered by salt, I have decided to try and implement a few things that came up during the workshop to see if the ideas presented to make development easier.
+Powered by salt, I have decided to try and implement a few things that came up during the workshop to see if the ideas presented do make development easier.
 
 Current status:
 
-| Feature               | Status | Source       |Comments         | Commit                                   |
-|-----------------------|--------|--------------|-----------------|------------------------------------------|
-| Multiple Tables       | Yes    | Classes, ORM | Already working | 75822c2097abb828424d6e5fb7eee7c4b06187a0 |
-| DB Query in Ctx       | Yes    | Classes, ORM | Already working | b3c2fbb56cc49b805810f07286592e1bb907187b |
-| Other DB Query in Ctx | Yes    | Classes, ORM | Already working | b3c2fbb56cc49b805810f07286592e1bb907187b |
+| Feature               | Status | Source        | Comments        | Commit                                   |
+| --------------------- | ------ | ------------- | --------------- | ---------------------------------------- |
+| Multiple Tables       | Yes    | Classes, ORM  | Already working | 75822c2097abb828424d6e5fb7eee7c4b06187a0 |
+| DB Query in Ctx       | Yes    | Classes, ORM  | Already working | b3c2fbb56cc49b805810f07286592e1bb907187b |
+| Other DB Query in Ctx | Yes    | Classes, ORM  | Already working | b3c2fbb56cc49b805810f07286592e1bb907187b |
+| Versioning of Runs    | Yes    | ORM, DB       | See section     | df35d5a4b0baf3cef9b35f87c7e99151d822a108 |
+| Python API Access     | Ish    | ORM           | ?               | ?                                        |
+| External Updates      | Ish    | Server DB     | Direct queries to mongo | ?                                |
+| API for Web-based GUI | Ish    | Pydantic/Starlite | ?           | ?                                        |
+| --------------------- | ------ | ------------- | --------------- | ---------------------------------------- |
+| Variable Extraction   | No     | ?             | See section     | ?                                        |
+| Versioning of Ctxt    | No     | ?             | ?               | ?                                        |
+| Better SLURM Deps.    | No     | ?             | ?               | ?                                        |
+| Run Groups/Var Groups | No     | ?             | ?               | ?                                        |
+| Sample Table          | No     | ?             | ?               | ?                                        |
+
+### Variable Extraction
+
+- Extracting multi-dimensional data from run object and optionally modifying it
+- Not done
+- Idea is:
+  - Return only the indexed run object
+  - Store the source and key (if available) in DB
+  - Lazily read the data from run when accessed
+- If the data is modified then you'd return an ndarray/xarray, which can be saved in a separate hdf5 file
+
+### Python API Access
+
+- Semi-available thanks to ORM
+- Property-based run object is carried over
+- No fancy saving of multidimensional data is done so there's not much to access
+
+### Versioning of Runs
+
+Done by:
+
+- Using hook `before_event(Insert, Replace, Update, SaveChanges)` from beanie to run a function when DB operation is performed.
+- Beanie ORM state management features allow for saving of changes and interaction with changes but does **not** store a history.
+  - `get_changes()` lets you find difference between original state and current state.
+  - `get_saved_state()` lets you find the original saved state.
+  - Using both you can find keys for changed values, and record the pre-changed value in a revision collection.
 
 ## Summary of Ideas
 
